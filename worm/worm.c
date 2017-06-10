@@ -6,7 +6,7 @@
 
 #include "worm.h"
 
-#define INFINITY 21
+#define TEN_MILLION 10000000000
 #define MIN(X, Y) (((X->n_elements) < (Y->n_elements)) ? (X) : (Y))
 
 #define remainder (count%g_nthreads)
@@ -122,6 +122,24 @@ void *find_book_worker_function(void *arg)
 // Returns result set containing book with given id.
 result_t* find_book(book_t* nodes, size_t count, size_t book_id)
 {
+	if(count < TEN_MILLION)
+	{
+		//sequential
+		bool book_found = false;
+		result_t* result = init_result();
+		for(int i = 0; i < count; ++i)
+		{
+			if((nodes+i)->id == book_id)
+			{
+				result->elements[0]=(nodes+i);
+				book_found = true;
+				break;
+			}
+		}
+		if(!book_found) return result;
+		result->n_elements++;
+		return result;
+	}
 	// Initialize a result struct
 	result_t* result = init_result();
 	pthread_t threads[g_nthreads];
@@ -197,8 +215,44 @@ void *find_author_worker_function(void *arg)
 }
 
 // Returns result set containing books by given author.
-result_t* find_books_by_author(book_t* nodes, size_t count, size_t author_id) {
+result_t* find_books_by_author(book_t* nodes, size_t count, size_t author_id)
+{
+	if(count < TEN_MILLION)
+	{
+			//sequential
+			bool auth_found = false;
+			result_t* result = init_result();
+			book_t* book = NULL;
+			for(int i = 0; i < count; ++i)
+			{
+				if((nodes+i)->author_id == author_id	 && !auth_found)
+				{
+					result->elements[0]=(nodes+i);
+					book = (nodes+i);
+					auth_found = true;
+				}
+			}
+			if(!auth_found) return result;
 
+			// Look through the author edges
+			size_t size = 1;
+			size_t mcount = 1;
+
+			for(int i = 0; i < book->n_author_edges; ++i)
+			{
+				mcount++;
+				if(mcount > size)
+				{
+					size = size*2;
+					result->elements = realloc(result->elements, sizeof(book_t**)*size);
+				}
+				result->elements[mcount-1] = (nodes + *(book->b_author_edges+i));
+			}
+			result->n_elements = mcount;
+			return result;
+	}
+
+	// Threaded
 	pthread_t threads[g_nthreads];
 	node_t* arg[g_nthreads];
 	result_t* result = init_result();
@@ -214,7 +268,7 @@ result_t* find_books_by_author(book_t* nodes, size_t count, size_t author_id) {
 		argp->count = count;
 		argp->id = author_id;
 
-		created += !pthread_create(threads + i, NULL, find_author_worker_function, argp);
+s		created += !pthread_create(threads + i, NULL, find_author_worker_function, argp);
 	}
 
 

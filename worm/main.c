@@ -139,6 +139,7 @@ book_t* graph_loader(size_t* count, char* filename) {
 
 void test_sample(book_t* graph, size_t count) {
 
+
 	result_t* r1 = find_book(graph, count, 9);
 	if (r1 == NULL) {
 		fprintf(stderr, "Fail! find_book() => result set is NULL.\n");
@@ -158,7 +159,6 @@ void test_sample(book_t* graph, size_t count) {
 		fprintf(stderr, "Fail! find_books_by_author() => result set contains %zu elements.\n", r2->n_elements);
 	}
 
-
 	result_t* r3 = find_shortest_distance(graph, count, 5, 13);
 	printf("%zu\n\n", r3->n_elements);
 	for(int i = 0; i < r3->n_elements; ++i)
@@ -167,23 +167,22 @@ void test_sample(book_t* graph, size_t count) {
 	}
 
 	result_t* r4 = find_books_reprinted(graph, count, 8);
-
 	result_t* r5 = find_books_k_distance(graph, count, 9, 2);
-	for(int i = 0; i < r5->n_elements; ++i)
-	{
-		printf("book_index: %zu book_id: %zu\n", r5->elements[i]->index, r5->elements[i]->id);
-	}
+
+
+
 
 	free(r1->elements);
 	free(r1);
 	free(r2->elements);
 	free(r2);
-	free(r3->elements);
-	free(r3);
 	free(r4->elements);
 	free(r4);
 	free(r5->elements);
 	free(r5);
+
+	free(r3->elements);
+	free(r3);
 }
 
 int main(int argc, char** argv) {
