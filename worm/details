@@ -1,0 +1,119 @@
+Index: 0
+ID: 9 | Publisher ID: 8 | Author ID: 20
+Publisher Edges: 2 5 6 9 10 12 13 14  <--- these are all indices referrring to other books
+Author edges: 1 2 3 4 5 6 7 10 11 12 13 16 18 19 <---same with these
+Citation edges: 3 15 6 <--- and these
+
+Index: 1
+ID: 14 | Publisher ID: 14 | Author ID: 20
+Publisher Edges: 3 4 7 8 11 15 16 17 18 19
+Author edges: 0 2 3 4 5 6 7 10 11 12 13 16 18 19
+Citation edges: 19 14 18 16
+
+Index: 2
+ID: 12 | Publisher ID: 8 | Author ID: 20
+Publisher Edges: 0 5 6 9 10 12 13 14
+Author edges: 0 1 3 4 5 6 7 10 11 12 13 16 18 19
+Citation edges: 11 18
+
+Index: 3
+ID: 7 | Publisher ID: 14 | Author ID: 20
+Publisher Edges: 1 4 7 8 11 15 16 17 18 19
+Author edges: 0 1 2 4 5 6 7 10 11 12 13 16 18 19
+Citation edges: 1 12
+
+Index: 4
+ID: 2 | Publisher ID: 14 | Author ID: 20
+Publisher Edges: 1 3 7 8 11 15 16 17 18 19
+Author edges: 0 1 2 3 5 6 7 10 11 12 13 16 18 19
+Citation edges: 17 2 10 19
+
+Index: 5
+ID: 1 | Publisher ID: 8 | Author ID: 20
+Publisher Edges: 0 2 6 9 10 12 13 14
+Author edges: 0 1 2 3 4 6 7 10 11 12 13 16 18 19
+Citation edges: 
+
+Index: 6
+ID: 18 | Publisher ID: 8 | Author ID: 20
+Publisher Edges: 0 2 5 9 10 12 13 14
+Author edges: 0 1 2 3 4 5 7 10 11 12 13 16 18 19
+Citation edges: 16 12 1
+
+Index: 7
+ID: 3 | Publisher ID: 14 | Author ID: 20
+Publisher Edges: 1 3 4 8 11 15 16 17 18 19
+Author edges: 0 1 2 3 4 5 6 10 11 12 13 16 18 19
+Citation edges: 8 11
+
+Index: 8
+ID: 6 | Publisher ID: 14 | Author ID: 1
+Publisher Edges: 1 3 4 7 11 15 16 17 18 19
+Author edges: 9 14 15 17
+Citation edges: 
+
+Index: 9
+ID: 0 | Publisher ID: 8 | Author ID: 1
+Publisher Edges: 0 2 5 6 10 12 13 14
+Author edges: 8 14 15 17
+Citation edges: 19 10 3
+
+Index: 10
+ID: 19 | Publisher ID: 8 | Author ID: 20
+Publisher Edges: 0 2 5 6 9 12 13 14
+Author edges: 0 1 2 3 4 5 6 7 11 12 13 16 18 19
+Citation edges: 17 3 9
+
+Index: 11
+ID: 5 | Publisher ID: 14 | Author ID: 20
+Publisher Edges: 1 3 4 7 8 15 16 17 18 19
+Author edges: 0 1 2 3 4 5 6 7 10 12 13 16 18 19
+Citation edges: 
+
+Index: 12
+ID: 9 | Publisher ID: 8 | Author ID: 20
+Publisher Edges: 0 2 5 6 9 10 13 14
+Author edges: 0 1 2 3 4 5 6 7 10 11 13 16 18 19
+Citation edges: 3 15 6
+
+Index: 13
+ID: 13 | Publisher ID: 8 | Author ID: 20
+Publisher Edges: 0 2 5 6 9 10 12 14
+Author edges: 0 1 2 3 4 5 6 7 10 11 12 16 18 19
+Citation edges: 19 8 11
+
+Index: 14
+ID: 11 | Publisher ID: 8 | Author ID: 1
+Publisher Edges: 0 2 5 6 9 10 12 13
+Author edges: 8 9 15 17
+Citation edges: 9 15 5 7
+
+Index: 15
+ID: 4 | Publisher ID: 14 | Author ID: 1
+Publisher Edges: 1 3 4 7 8 11 16 17 18 19
+Author edges: 8 9 14 17
+Citation edges: 17 5 18 1
+
+Index: 16
+ID: 10 | Publisher ID: 14 | Author ID: 20
+Publisher Edges: 1 3 4 7 8 11 15 17 18 19
+Author edges: 0 1 2 3 4 5 6 7 10 11 12 13 18 19
+Citation edges: 1
+
+Index: 17
+ID: 15 | Publisher ID: 14 | Author ID: 1
+Publisher Edges: 1 3 4 7 8 11 15 16 18 19
+Author edges: 8 9 14 15
+Citation edges: 7 3 15 2 12 0
+
+Index: 18
+ID: 8 | Publisher ID: 14 | Author ID: 20
+Publisher Edges: 1 3 4 7 8 11 15 16 17 19
+Author edges: 0 1 2 3 4 5 6 7 10 11 12 13 16 19
+Citation edges: 5 8
+
+Index: 19
+ID: 19 | Publisher ID: 14 | Author ID: 20
+Publisher Edges: 1 3 4 7 8 11 15 16 17 18
+Author edges: 0 1 2 3 4 5 6 7 10 11 12 13 16 18
+Citation edges: 17 3 9

@@ -81,7 +81,7 @@ bool isEmpty(queue_t* queue)
 result_t* init_result()
 {
 	result_t* result = (result_t*)malloc(sizeof(result_t));
-	result->elements = (book_t**)malloc(sizeof(result_t));
+	result->elements = (book_t**)malloc(sizeof(book_t*));
 	result->n_elements = 0;
 	return result;
 }
@@ -350,29 +350,65 @@ result_t* find_books_k_distance(book_t* nodes, size_t count, size_t book_id, uin
 	if(k > count)
 		k = count;
 	result_t* result = init_result();
-	result->elements = (book_t**)malloc(sizeof(book_t*));
-	// Find book. Think about doing this with threads later
+	size_t mcount = 1;
+	size_t size = 1;
+	bool flag[count]; // flag[] to keep track of which nodes were visited
+	size_t dis[count]; // pun pun pun pun pun pun pun
+	// Find book and initialize stuff
 	size_t book_index = -1;
 	for(int i = 0; i < count; ++i)
 	{
 		(nodes+i)->index = i;
+		flag[i] = false;
+		dis[i] = 0;
 		if((nodes+i)->id == book_id)
 		{
 			book_index = (nodes+i)->index;
-			break;
 		}
 	}
 	// book_index not found
 	if(book_index == -1) return result;
-
-	bool flag[count]; // flag[] to keep track of which nodes were visited
-	int prev[count]; // prev[] to keep track of which nodes came before the kth indexed node where prev[k]
-
-	// Perform BFS
-	while(k >= 0)
+	bool reached = false;
+	// BFS FUNCTION
+	queue_t* queue = init_queue(); // Initialise the queue
+	book_t* v = (nodes+book_index); // Set v to first node
+	flag[book_index] = true;
+	dis[book_index] = 0;
+	enqueue(queue, v);
+	while(!isEmpty(queue))
 	{
+		v = dequeue(queue);
+		size_t current_index = v->index;
+		if(mcount == 1)
+			result->elements[0] = (nodes+current_index);
+		// Visit all the neighbours of u with all the edges and push them into the queue
+		for(int j = 0; j < (nodes+current_index)->n_citation_edges; ++j)
+		{
+			size_t index = *((nodes+current_index)->b_citation_edges+j);
+			if(flag[index] == false)
+			{
+				dis[index] = dis[current_index] + 1;
+				if(dis[index] > k)
+				{
+					reached = true;
+					break;
+				}
+				mcount++;
+				if(mcount > size)
+				{
+					size = size*2;
+					result->elements = realloc(result->elements, sizeof(book_t*)*size);
+				}
+				result->elements[mcount-1] = (nodes+index);
+				flag[index] = true;
+				enqueue(queue, nodes + index);
 
+			}
+		}
+		if(reached)	break;
 	}
+	free(queue);
+	result->n_elements = mcount;
 	return result;
 }
 
@@ -418,7 +454,7 @@ result_t* find_shortest_distance(book_t* nodes, size_t count, size_t b1_id, size
 		size_t n_edges = (nodes+current_index)->n_author_edges + (nodes+current_index)->n_publisher_edges + (nodes+current_index)->n_citation_edges;
 		for(int j = 0; j < n_edges; ++j)
 		{
-			int index = 0;
+			size_t index = 0;
 			if(j >= 0 && j < (nodes+current_index)->n_author_edges)
 				index = *((nodes+current_index)->b_author_edges+j);
 			else if( j >= (nodes+current_index)->n_author_edges && j < (nodes+current_index)->n_author_edges + (nodes+current_index)->n_citation_edges)
