@@ -280,7 +280,7 @@ int main(int argc, char** argv) {
 	// Example usage
 
 	size_t count = 0;
-	book_t* graph = graph_loader(&count, "1M.graph.graph");
+	book_t* graph = graph_loader(&count, "LargeLib.graph.graph");
 	if (graph == NULL) {
 		return 1;
 	}
