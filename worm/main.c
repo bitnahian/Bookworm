@@ -140,14 +140,6 @@ book_t* graph_loader(size_t* count, char* filename) {
 
 void test_sample(book_t* graph, size_t count) {
 
-	clock_t begin = clock();
-	result_t* r1 = find_shortest_distance(graph, count, 41592, 2247);
-	clock_t end = clock();
-
-	printf("\n\n %lf seconds\n\n", (double)(end - begin) / CLOCKS_PER_SEC);
-
-	free(r1->elements);
-	free(r1);
 /*
 	result_t* r2 = find_books_by_author(graph, count, 1);
 	if (r2 == NULL) {
@@ -188,18 +180,124 @@ void test_sample(book_t* graph, size_t count) {
 
 
 }
+void my_test(book_t* graph, size_t count){
+	result_t* r1;
+	result_t* r2;
+	result_t* r3;
+	result_t* r4;
+	result_t* r5;
+
+	clock_t tic;
+	clock_t toc;
+
+	tic = clock();
+	r1 = find_book(graph, count, 20436);
+	toc = clock();
+	printf("\n\n\nfind_book: %f seconds\n", (double)(toc - tic) / CLOCKS_PER_SEC);
+
+	printf("find_book() => result set contains %zu elements.\n\n\n", r1->n_elements);
+
+
+
+
+	tic = clock();
+	r2 = find_books_by_author(graph, count, 1150);
+	toc = clock();
+	printf("find_books_by_author: %f seconds\n", (double)(toc - tic) / CLOCKS_PER_SEC);
+
+	printf("find_books_by_author() => result set contains %zu elements.\n\n\n", r2->n_elements);
+
+
+
+
+	tic = clock();
+	r3 = find_books_reprinted(graph, count, 37);
+	toc = clock();
+	printf("find_books_reprinted: %f seconds\n", (double)(toc - tic) / CLOCKS_PER_SEC);
+
+	printf("find_books_by_reprinted() => result set contains %zu elements.\n\n\n", r3->n_elements);
+
+
+
+
+	tic = clock();
+	r4 = find_books_k_distance(graph, count, 94353, 3446);
+	toc = clock();
+	printf("find_books_k_distance: %f seconds\n", (double)(toc - tic) / CLOCKS_PER_SEC);
+
+	printf("find_books_k_distance() => result set contains %zu elements.\n\n\n", r4->n_elements);
+
+
+
+	tic = clock();
+	r5 = find_shortest_distance(graph, count, 45412, 57239);
+	toc = clock();
+	printf("find_shortest_distance: %f seconds\n", (double)(toc - tic) / CLOCKS_PER_SEC);
+
+	printf("find_shortest_distance() => result set contains %zu elements.\n\n\n", r5->n_elements);
+
+
+
+	if (r1 != NULL) {
+		if (r1->elements != NULL) {
+			free(r1->elements);
+		}
+		free(r1);
+	}
+
+	if (r2 != NULL) {
+		if (r2->elements != NULL) {
+			free(r2->elements);
+		}
+		free(r2);
+	}
+
+	if (r3 != NULL) {
+		if (r3->elements != NULL) {
+			free(r3->elements);
+		}
+		free(r3);
+	}
+
+	if (r4 != NULL) {
+		if (r4->elements != NULL) {
+			free(r4->elements);
+		}
+		free(r4);
+	}
+
+	if (r5 != NULL) {
+		if (r5->elements != NULL) {
+			free(r5->elements);
+		}
+		free(r5);
+	}
+
+}
 
 int main(int argc, char** argv) {
 
 	// Example usage
 
 	size_t count = 0;
-	book_t* graph = graph_loader(&count, "LargeLib.graph.graph");
+	book_t* graph = graph_loader(&count, "1M.graph.graph");
 	if (graph == NULL) {
 		return 1;
 	}
 
-	test_sample(graph, count);
+	//	test_sample(graph, count);
+	/*
+	clock_t begin = clock();
+	result_t* r1 = find_books_k_distance(graph, count, 713080, 34464);
+	clock_t end = clock();
+
+	printf("\n\n %lf seconds\n\n", (double)(end - begin) / CLOCKS_PER_SEC);
+
+	free(r1->elements);
+	free(r1);
+	*/
+
+	my_test(graph, count);
 
 	for (size_t i = 0; i < count; i++) {
 		free(graph[i].b_author_edges);

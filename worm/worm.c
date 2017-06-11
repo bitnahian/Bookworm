@@ -15,7 +15,6 @@ size_t g_nthreads = 4;
 bool found = false;
 //pthread_mutex_t locker = PTHREAD_MUTEX_INITIALIZER;
 
-
 void enqueue(queue_t* queue, book_t* book) // O(1)
 {
 	// Increase the queue at the head
@@ -111,13 +110,14 @@ void *find_book_worker_function(void *arg)
 // Returns result set containing book with given id.
 result_t* find_book(book_t* nodes, size_t count, size_t book_id)
 {
-	if(count < TEN_MILLION)
-	{
+	//if(count < TEN_MILLION)
+	//{
 		//sequential
 		bool book_found = false;
 		result_t* result = init_result();
-		#pragma clang loop unroll_count(16)
-		for(int i = 0; i < count; ++i)
+		//#pragma clang loop unroll_count(16)
+		int i = 0;
+		for(i = 0; i < count; ++i)
 		{
 			if((nodes+i)->id == book_id)
 			{
@@ -130,6 +130,7 @@ result_t* find_book(book_t* nodes, size_t count, size_t book_id)
 		result->n_elements++;
 		return result;
 	}
+	/*}
 	// Initialize a result struct
 	result_t* result = init_result();
 	pthread_t threads[g_nthreads];
@@ -170,7 +171,7 @@ result_t* find_book(book_t* nodes, size_t count, size_t book_id)
 	found = false; // Set found to false for reuse
 	return result;
 }
-
+*/
 // Returns result set containing books with the given author
 void *find_author_worker_function(void *arg)
 {
@@ -207,14 +208,16 @@ void *find_author_worker_function(void *arg)
 // Returns result set containing books by given author.
 result_t* find_books_by_author(book_t* nodes, size_t count, size_t author_id)
 {
+	/*
 	if(count < TEN_MILLION)
 	{
-			//sequential
+		*/	//sequential
 			bool auth_found = false;
 			result_t* result = init_result();
 			book_t* book = NULL;
-
-			for(int i = 0; i < count; ++i)
+			//#pragma unroll
+			int i = 0;
+			for(i = 0; i < count; ++i)
 			{
 				if((nodes+i)->author_id == author_id	 && !auth_found)
 				{
@@ -229,7 +232,7 @@ result_t* find_books_by_author(book_t* nodes, size_t count, size_t author_id)
 			size_t size = 1;
 			size_t mcount = 1;
 
-			for(int i = 0; i < book->n_author_edges; ++i)
+			for(i = 0; i < book->n_author_edges; ++i)
 			{
 				mcount++;
 				if(mcount > size)
@@ -242,7 +245,7 @@ result_t* find_books_by_author(book_t* nodes, size_t count, size_t author_id)
 			result->n_elements = mcount;
 			return result;
 	}
-
+	/*
 	// Threaded
 	pthread_t threads[g_nthreads];
 	node_t* arg[g_nthreads];
@@ -289,7 +292,7 @@ result_t* find_books_by_author(book_t* nodes, size_t count, size_t author_id)
 	return result;
 }
 
-
+*/
 void *find_publisher_worker_function(void *arg)
 {
 	// Make life easy *wink wink*
@@ -335,19 +338,21 @@ void *find_publisher_worker_function(void *arg)
 
 // Returns result set containing books that have been reprinted by a different publisher.
 result_t* find_books_reprinted(book_t* nodes, size_t count, size_t publisher_id) {
-	if(count < TEN_MILLION)
+	/*if(count < TEN_MILLION)
 	{
-		//sequential
+	*/	//sequential
 		result_t* result = init_result();
 		size_t size = 1;
 		size_t lcount = 1;
-		for(int i = 0; i < count; ++i)
+		int i = 0;
+		int j = 0;
+		for(i = 0; i < count; ++i)
 		{
 			if((nodes + i)->publisher_id == publisher_id)
 			{
 				size_t curr_book_id = (nodes+i)->id;
 				size_t* auth_edge = (nodes+i)->b_author_edges;
-				for(int j = 0; j < (nodes+i)->n_author_edges; ++j)
+				for(j = 0; j < (nodes+i)->n_author_edges; ++j)
 				{
 					if((nodes + auth_edge[j])->id == curr_book_id
 					&& (nodes+ auth_edge[j])->publisher_id != publisher_id)
@@ -367,6 +372,7 @@ result_t* find_books_reprinted(book_t* nodes, size_t count, size_t publisher_id)
 
 		return result;
 	}
+	/*
 	pthread_t threads[g_nthreads];
 	node_t* arg[g_nthreads];
 	result_t* result = init_result();
@@ -418,7 +424,7 @@ result_t* find_books_reprinted(book_t* nodes, size_t count, size_t publisher_id)
 
 	return result;
 }
-
+*/
 
 // Returns result set containing books that are k distance from given book.
 result_t* find_books_k_distance(book_t* nodes, size_t count, size_t book_id, uint16_t k) {
@@ -426,11 +432,12 @@ result_t* find_books_k_distance(book_t* nodes, size_t count, size_t book_id, uin
 	size_t mcount = 1;
 	size_t size = 1;
 	bool flag[count]; // flag[] to keep track of which nodes were visited
-	size_t dis[count]; // pun pun pun pun pun pun pun
+	uint16_t dis[count]; // pun pun pun pun pun pun pun
 	// Find book and initialize stuff
 	size_t book_index = -1;
-	#pragma unroll
-	for(int i = 0; i < count; ++i)
+	//#pragma unroll
+	int i = 0;
+	for(i = 0; i < count; ++i)
 	{
 		flag[i] = false;
 		dis[i] = 0;
@@ -452,12 +459,13 @@ result_t* find_books_k_distance(book_t* nodes, size_t count, size_t book_id, uin
 	enqueue(queue, v);
 	size_t current_index = 0;
 	size_t index = 0;
+	int j = 0;
 	while(!isEmpty(queue) && !reached)
 	{
 		v = dequeue(queue);
 		current_index = v->index;
 		// Visit all the neighbours of u with all the edges and push them into the queue
-		for(int j = 0; j < (nodes+current_index)->n_citation_edges; ++j)
+		for(j = 0; j < (nodes+current_index)->n_citation_edges; ++j)
 		{
 			index = *((nodes+current_index)->b_citation_edges+j);
 			if(flag[index] == false)
@@ -495,7 +503,7 @@ result_t* find_shortest_distance(book_t* nodes, size_t count, size_t b1_id, size
 	int prev[count]; // prev[] to keep track of which nodes came before the kth indexed node where prev[k]
 	bool b2_found = false;
 	// Find b1_id
-	#pragma unroll
+	//#pragma unroll
 	for(i = 0; i < count; ++i)
 	{
 		flag[i] = false;
@@ -520,21 +528,29 @@ result_t* find_shortest_distance(book_t* nodes, size_t count, size_t b1_id, size
 	size_t n_edges = 0;
 	size_t index = 0;
 	enqueue(queue, v);
-	while(!isEmpty(queue))
+	size_t n_author_edges = 0;
+	size_t n_publisher_edges = 0;
+	size_t n_citation_edges = 0;
+	while(!isEmpty(queue) && !b2_found)
 	{
 		v = dequeue(queue);
 		current_index = v->index;
 		// Visit all the neighbours of u with all the edges and push them into the queue
 		n_edges = (nodes+current_index)->n_author_edges + (nodes+current_index)->n_publisher_edges + (nodes+current_index)->n_citation_edges;
-		for(int j = 0; j < n_edges; ++j)
+		int j = 0;
+		for(j = 0; j < n_edges; ++j)
 		{
+			n_author_edges = (nodes+current_index)->n_author_edges;
+			n_publisher_edges = (nodes+current_index)->n_publisher_edges;
+			n_citation_edges = (nodes+current_index)->n_citation_edges;
 			index = 0;
-			if(j >= 0 && j < (nodes+current_index)->n_author_edges)
+			if(j >= 0 && j < n_author_edges)
 				index = *((nodes+current_index)->b_author_edges+j);
-			else if( j >= (nodes+current_index)->n_author_edges && j < (nodes+current_index)->n_author_edges + (nodes+current_index)->n_citation_edges)
-				index = *((nodes+current_index)->b_citation_edges+(j - (nodes+current_index)->n_author_edges));
+			else if( j >= n_author_edges && j < n_author_edges + n_publisher_edges)
+				index = *((nodes+current_index)->b_publisher_edges+(j - n_author_edges));
 			else
-				index = *((nodes+current_index)->b_publisher_edges+j - ((nodes+current_index)->n_author_edges + (nodes+current_index)->n_citation_edges));
+				index = *((nodes+current_index)->b_citation_edges+j - (n_author_edges + n_publisher_edges));
+
 
 			if(flag[index] == false)
 			{
@@ -548,7 +564,6 @@ result_t* find_shortest_distance(book_t* nodes, size_t count, size_t b1_id, size
 				}
 			}
 		}
-		if(b2_found) break;
 	}
 	free(queue);
 	// Return empty set if there was no path
@@ -559,7 +574,7 @@ result_t* find_shortest_distance(book_t* nodes, size_t count, size_t b1_id, size
 	elements[0] = (nodes+b2_index);
 	// *** Backtracking Algorithm ***
 	int mcount = 1;
-	size_t size = 1;
+	uint16_t size = 1;
 	while(prev[b2_index] != -1)
 	{
 		mcount++;
@@ -569,8 +584,9 @@ result_t* find_shortest_distance(book_t* nodes, size_t count, size_t b1_id, size
 		elements[mcount-1] = (nodes+b2_index);
 	}
 	result->elements = realloc(result->elements, sizeof(book_t*)*mcount);
+	int m = 0;
 	#pragma unroll
-	for(int m = 0; m < mcount; ++m)
+	for(m = 0; m < mcount; ++m)
 	{
 		result->elements[m] = elements[mcount-m-1];
 	}
