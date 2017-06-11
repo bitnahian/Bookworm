@@ -1,5 +1,5 @@
 CC = clang
-CFLAGS = -g -O0 -Wall -Werror -std=gnu11 -march=native -lpthread
+CFLAGS = -g -O0 -Wall -Werror -std=gnu11 -march=native -lpthread -fsanitize=address
 
 .PHONY: all clean
 

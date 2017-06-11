@@ -7,7 +7,6 @@
 #include "worm.h"
 
 #define TEN_MILLION 10000000000
-#define MIN(X, Y) (((X->n_elements) < (Y->n_elements)) ? (X) : (Y))
 
 #define remainder (count%g_nthreads)
 #define chunks (count/g_nthreads)
@@ -59,16 +58,6 @@ queue_t* init_queue() {
 	queue->size = 0;
 
 	return queue;
-}
-
-void freeQueue(queue_t* queue)
-{
-	//book_t* temp = NULL;
-//	while((temp = dequeue(queue)) != NULL)
-	//{
-	//	free(temp);
-//	}
-	free(queue);
 }
 
 bool isEmpty(queue_t* queue)
@@ -127,6 +116,7 @@ result_t* find_book(book_t* nodes, size_t count, size_t book_id)
 		//sequential
 		bool book_found = false;
 		result_t* result = init_result();
+		#pragma clang loop unroll_count(16)
 		for(int i = 0; i < count; ++i)
 		{
 			if((nodes+i)->id == book_id)
@@ -223,6 +213,7 @@ result_t* find_books_by_author(book_t* nodes, size_t count, size_t author_id)
 			bool auth_found = false;
 			result_t* result = init_result();
 			book_t* book = NULL;
+
 			for(int i = 0; i < count; ++i)
 			{
 				if((nodes+i)->author_id == author_id	 && !auth_found)
@@ -268,7 +259,7 @@ result_t* find_books_by_author(book_t* nodes, size_t count, size_t author_id)
 		argp->count = count;
 		argp->id = author_id;
 
-s		created += !pthread_create(threads + i, NULL, find_author_worker_function, argp);
+		created += !pthread_create(threads + i, NULL, find_author_worker_function, argp);
 	}
 
 
@@ -344,7 +335,38 @@ void *find_publisher_worker_function(void *arg)
 
 // Returns result set containing books that have been reprinted by a different publisher.
 result_t* find_books_reprinted(book_t* nodes, size_t count, size_t publisher_id) {
+	if(count < TEN_MILLION)
+	{
+		//sequential
+		result_t* result = init_result();
+		size_t size = 1;
+		size_t lcount = 1;
+		for(int i = 0; i < count; ++i)
+		{
+			if((nodes + i)->publisher_id == publisher_id)
+			{
+				size_t curr_book_id = (nodes+i)->id;
+				size_t* auth_edge = (nodes+i)->b_author_edges;
+				for(int j = 0; j < (nodes+i)->n_author_edges; ++j)
+				{
+					if((nodes + auth_edge[j])->id == curr_book_id
+					&& (nodes+ auth_edge[j])->publisher_id != publisher_id)
+					{
+						if(lcount > size)
+						{
+							size = size*2;
+							result->elements = realloc(result->elements, sizeof(book_t**)*size);
+						}
+						result->elements[lcount-1] = (nodes+ auth_edge[j]);
+						result->n_elements++;
+						lcount++;
+					}
+				}
+			}
+		}
 
+		return result;
+	}
 	pthread_t threads[g_nthreads];
 	node_t* arg[g_nthreads];
 	result_t* result = init_result();
@@ -400,9 +422,6 @@ result_t* find_books_reprinted(book_t* nodes, size_t count, size_t publisher_id)
 
 // Returns result set containing books that are k distance from given book.
 result_t* find_books_k_distance(book_t* nodes, size_t count, size_t book_id, uint16_t k) {
-
-	if(k > count)
-		k = count;
 	result_t* result = init_result();
 	size_t mcount = 1;
 	size_t size = 1;
@@ -410,11 +429,12 @@ result_t* find_books_k_distance(book_t* nodes, size_t count, size_t book_id, uin
 	size_t dis[count]; // pun pun pun pun pun pun pun
 	// Find book and initialize stuff
 	size_t book_index = -1;
+	#pragma unroll
 	for(int i = 0; i < count; ++i)
 	{
-		(nodes+i)->index = i;
 		flag[i] = false;
 		dis[i] = 0;
+		(nodes+i)->index = i;
 		if((nodes+i)->id == book_id)
 		{
 			book_index = (nodes+i)->index;
@@ -422,23 +442,24 @@ result_t* find_books_k_distance(book_t* nodes, size_t count, size_t book_id, uin
 	}
 	// book_index not found
 	if(book_index == -1) return result;
-	bool reached = false;
+	result->elements[0] = (nodes+book_index);
 	// BFS FUNCTION
 	queue_t* queue = init_queue(); // Initialise the queue
 	book_t* v = (nodes+book_index); // Set v to first node
 	flag[book_index] = true;
 	dis[book_index] = 0;
+	bool reached = false;
 	enqueue(queue, v);
-	while(!isEmpty(queue))
+	size_t current_index = 0;
+	size_t index = 0;
+	while(!isEmpty(queue) && !reached)
 	{
 		v = dequeue(queue);
-		size_t current_index = v->index;
-		if(mcount == 1)
-			result->elements[0] = (nodes+current_index);
+		current_index = v->index;
 		// Visit all the neighbours of u with all the edges and push them into the queue
 		for(int j = 0; j < (nodes+current_index)->n_citation_edges; ++j)
 		{
-			size_t index = *((nodes+current_index)->b_citation_edges+j);
+			index = *((nodes+current_index)->b_citation_edges+j);
 			if(flag[index] == false)
 			{
 				dis[index] = dis[current_index] + 1;
@@ -456,10 +477,8 @@ result_t* find_books_k_distance(book_t* nodes, size_t count, size_t book_id, uin
 				result->elements[mcount-1] = (nodes+index);
 				flag[index] = true;
 				enqueue(queue, nodes + index);
-
 			}
 		}
-		if(reached)	break;
 	}
 	free(queue);
 	result->n_elements = mcount;
@@ -476,6 +495,7 @@ result_t* find_shortest_distance(book_t* nodes, size_t count, size_t b1_id, size
 	int prev[count]; // prev[] to keep track of which nodes came before the kth indexed node where prev[k]
 	bool b2_found = false;
 	// Find b1_id
+	#pragma unroll
 	for(i = 0; i < count; ++i)
 	{
 		flag[i] = false;
@@ -485,30 +505,30 @@ result_t* find_shortest_distance(book_t* nodes, size_t count, size_t b1_id, size
 		if(curr_node->id == b1_id)
 		{
 			b1_index = i;
-			//printf("%zu\n", b1_index);
 		}
 		if(curr_node->id == b2_id) {
 			b2_index = i;
-			//printf("%zu\n", b2_index);
 		}
 	}
 	if(b1_index == -1) return result;
 	if(b2_index == -1) return result;
-	if(b1_id == b2_id) return result;
 	// BFS FUNCTION
 	queue_t* queue = init_queue(); // Initialise the queue
 	book_t* v = (nodes+b1_index); // Set v to first node
 	flag[b1_index] = true;
+	size_t current_index = 0;
+	size_t n_edges = 0;
+	size_t index = 0;
 	enqueue(queue, v);
 	while(!isEmpty(queue))
 	{
 		v = dequeue(queue);
-		size_t current_index = v->index;
+		current_index = v->index;
 		// Visit all the neighbours of u with all the edges and push them into the queue
-		size_t n_edges = (nodes+current_index)->n_author_edges + (nodes+current_index)->n_publisher_edges + (nodes+current_index)->n_citation_edges;
+		n_edges = (nodes+current_index)->n_author_edges + (nodes+current_index)->n_publisher_edges + (nodes+current_index)->n_citation_edges;
 		for(int j = 0; j < n_edges; ++j)
 		{
-			size_t index = 0;
+			index = 0;
 			if(j >= 0 && j < (nodes+current_index)->n_author_edges)
 				index = *((nodes+current_index)->b_author_edges+j);
 			else if( j >= (nodes+current_index)->n_author_edges && j < (nodes+current_index)->n_author_edges + (nodes+current_index)->n_citation_edges)
@@ -529,41 +549,6 @@ result_t* find_shortest_distance(book_t* nodes, size_t count, size_t b1_id, size
 			}
 		}
 		if(b2_found) break;
-		/*
-		for(int j = 0; j < (nodes+current_index)->n_citation_edges; ++j)
-		{
-			int index = *((nodes+current_index)->b_citation_edges+j);
-			if(flag[index] == false)
-			{
-				flag[index] = true;
-				enqueue(queue, nodes + index);
-				//(nodes+index)->back_pointer = (nodes+current_index);
-				prev[index] = current_index;
-				if(index == b2_index)
-				{
-					b2_found = true;
-					break;
-				}
-			}
-		}
-		if(b2_found) break;
-		for(int j = 0; j < (nodes+current_index)->n_publisher_edges; ++j)
-		{
-			int index = *((nodes+current_index)->b_publisher_edges+j);
-			if(flag[index] == false)
-			{
-				flag[index] = true;
-				enqueue(queue, nodes + index);
-				prev[index] = current_index;
-				if(index == b2_index)
-				{
-					b2_found = true;
-					break;
-				}
-			}
-		}
-		if(b2_found) break;
-		*/
 	}
 	free(queue);
 	// Return empty set if there was no path
@@ -572,9 +557,9 @@ result_t* find_shortest_distance(book_t* nodes, size_t count, size_t b1_id, size
 	// Backtrack to find the shortest path
 	book_t** elements = (book_t**)malloc(sizeof(book_t*));
 	elements[0] = (nodes+b2_index);
-	int mcount = 1;
 	// *** Backtracking Algorithm ***
-	int size = 1;
+	int mcount = 1;
+	size_t size = 1;
 	while(prev[b2_index] != -1)
 	{
 		mcount++;
@@ -584,6 +569,7 @@ result_t* find_shortest_distance(book_t* nodes, size_t count, size_t b1_id, size
 		elements[mcount-1] = (nodes+b2_index);
 	}
 	result->elements = realloc(result->elements, sizeof(book_t*)*mcount);
+	#pragma unroll
 	for(int m = 0; m < mcount; ++m)
 	{
 		result->elements[m] = elements[mcount-m-1];
@@ -600,239 +586,3 @@ result_t* find_shortest_edge_type(book_t* nodes, size_t count, size_t a1_id, siz
 	// TODO
 	return NULL;
 }
-/*
-result_t* author_BFS(book_t* nodes, size_t count, size_t b1_id, size_t b2_id)
-{
-	// Initialize a result struct
-	result_t* result = init_result();
-	int i = 0;
-	size_t b1_index = 0;
-	size_t b2_index = 0;
-	bool flag[count]; // flag[] to keep track of which nodes were visited
-	int prev[count]; // prev[] to keep track of which nodes came before the kth indexed node where prev[k]
-
-	// Find b1_id
-	for(i = 0; i < count; ++i)
-	{
-		flag[i] = false;
-		prev[i] = -1; // Set all previous values to -1
-		(nodes+i)->index = i;
-		if((nodes+i)->id == b1_id) {
-			b1_index = i;
-		}
-		if((nodes+i)->id == b2_id) {
-			b2_index = i;
-		}
-	}
-	// BFS FUNCTION
-	queue_t* queue = init_queue(); // Initialise the queue
-	book_t* v = (nodes+b1_index); // Set v to first node
-	flag[b1_index] = true;
-	enqueue(queue, v);
-	while(!isEmpty(queue))
-	{
-		book_t* u = dequeue(queue);
-		size_t current_index = u->index;
-		// Visit all the neighbours of u
-		for(int j = 0; j < (nodes+current_index)->n_author_edges; ++j)
-		{
-			int index = *((nodes+current_index)->b_author_edges+j);
-			if(flag[index] == false)
-			{
-			flag[index] = true;
-			enqueue(queue, nodes + index);
-			prev[index] = current_index;
-			if(index == b2_index) break;
-			}
-		}
-	}
-	free(queue);
-	// Backtrack to find the shortest path
-	book_t** elements = (book_t**)malloc(sizeof(book_t*));
-	elements[0] = (nodes+b2_index);
-	//printf("reached2\n" );
-	int mcount = 1;
-	// *** Backtracking Algorithm ***
-	while(prev[b2_index] != -1)
-	{
-		mcount++;
-		b2_index = prev[b2_index];
-		elements = realloc(elements, sizeof(book_t*)*mcount);
-		elements[mcount-1] = (nodes+b2_index);
-	}
-	result->elements = realloc(result->elements, sizeof(book_t*)*mcount);
-	for(int m = 0; m < mcount; ++m)
-	{
-		result->elements[m] = elements[mcount-m-1];
-	}
-
-	result->n_elements = mcount;
-	free(elements);
-
-	return result;
-}
-result_t* publisher_BFS(book_t* nodes, size_t count, size_t b1_id, size_t b2_id)
-{
-	// Initialize a result struct
-	result_t* result = init_result();
-	int i = 0;
-	size_t b1_index = 0;
-	size_t b2_index = 0;
-	bool flag[count];
-	int prev[count];
-
-	// Find b1_id
-	for(i = 0; i < count; ++i)
-	{
-		flag[i] = false;
-		prev[i] = -1; // Set all previous values to -1
-		(nodes+i)->index = i;
-		if((nodes+i)->id == b1_id) {
-			b1_index = i;
-		}
-		if((nodes+i)->id == b2_id) {
-			b2_index = i;
-		}
-	}
-	// BFS FUNCTION
-	queue_t* queue = init_queue(); // Initialise the queue
-	book_t* v = (nodes+b1_index); // Set v to first node
-	flag[b1_index] = true;
-	enqueue(queue, v);
-	while(!isEmpty(queue))
-	{
-		book_t* u = dequeue(queue);
-		size_t current_index = u->index;
-		for(int j = 0; j < (nodes+current_index)->n_publisher_edges; ++j)
-		{
-			int index = *((nodes+current_index)->b_publisher_edges+j);
-			if(flag[index] == false)
-			{
-			flag[index] = true;
-			enqueue(queue, nodes + index);
-			prev[index] = current_index;
-			if(index == b2_index) break;
-			}
-		}
-	}
-	free(queue);
-	book_t** elements = (book_t**)malloc(sizeof(book_t*));
-	elements[0] = (nodes+b2_index);
-	int mcount = 1;
-	while(prev[b2_index] != -1)
-	{
-		mcount++;
-		b2_index = prev[b2_index];
-		elements = realloc(elements, sizeof(book_t*)*mcount);
-		elements[mcount-1] = (nodes+b2_index);
-	}
-	result->elements = realloc(result->elements, sizeof(book_t*)*mcount);
-	for(int m = 0; m < mcount; ++m)
-	{
-		result->elements[m] = elements[mcount-m-1];
-	}
-
-	result->n_elements = mcount;
-	free(elements);
-
-	return result;
-}
-result_t* citations_BFS(book_t* nodes, size_t count, size_t b1_id, size_t b2_id)
-{
-	// Initialize a result struct
-	result_t* result = init_result();
-	int i = 0;
-	size_t b1_index = 0;
-	size_t b2_index = 0;
-	bool flag[count];
-	int prev[count];
-
-	// Find b1_id
-	for(i = 0; i < count; ++i)
-	{
-		flag[i] = false;
-		prev[i] = -1; // Set all previous values to -1
-		(nodes+i)->index = i;
-		if((nodes+i)->id == b1_id) {
-			b1_index = i;
-		}
-		if((nodes+i)->id == b2_id) {
-			b2_index = i;
-		}
-	}
-	// BFS FUNCTION
-	queue_t* queue = init_queue(); // Initialise the queue
-	book_t* v = (nodes+b1_index); // Set v to first node
-	flag[b1_index] = true;
-	enqueue(queue, v);
-	while(!isEmpty(queue))
-	{
-		book_t* u = dequeue(queue);
-		size_t current_index = u->index;
-		for(int j = 0; j < (nodes+current_index)->n_citation_edges; ++j)
-		{
-			int index = *((nodes+current_index)->b_citation_edges+j);
-			if(flag[index] == false)
-			{
-			flag[index] = true;
-			enqueue(queue, nodes + index);
-			prev[index] = current_index;
-			if(index == b2_index) break;
-			}
-		}
-	}
-	free(queue);
-	book_t** elements = (book_t**)malloc(sizeof(book_t*));
-	elements[0] = (nodes+b2_index);
-	int mcount = 1;
-	while(prev[b2_index] != -1)
-	{
-		mcount++;
-		b2_index = prev[b2_index];
-		elements = realloc(elements, sizeof(book_t*)*mcount);
-		elements[mcount-1] = (nodes+b2_index);
-	}
-	result->elements = realloc(result->elements, sizeof(book_t*)*mcount);
-	for(int m = 0; m < mcount; ++m)
-	{
-		result->elements[m] = elements[mcount-m-1];
-	}
-	if(mcount == 1) mcount = INFINITY;
-	result->n_elements = mcount;
-	free(elements);
-
-	return result;
-}
-
-
-// Returns result set containing books in shortest path between book 1 and 2.
-result_t* find_shortest_distance(book_t* nodes, size_t count, size_t b1_id, size_t b2_id) {
-
-	//pthread_t threads[g_nthreads];
-	//node_t* arg[g_nthreads];
-	result_t* r1 = author_BFS(nodes, count, b1_id, b2_id);
-	result_t* r2 = publisher_BFS(nodes, count, b1_id, b2_id);
-	result_t* r3 = citations_BFS(nodes, count, b1_id, b2_id);
-
-	result_t* r4 = MIN(r1,r2);
-	result_t* r5 = MIN(r3,r4);
-
-	if(r5 != r1)
-	{
-		free(r1->elements);
-		free(r1);
-	}
-	if(r5 != r2)
-	{
-		free(r2->elements);
-		free(r2);
-	}
-	if(r5 != r3)
-	{
-		free(r3->elements);
-		free(r3);
-	}
-
-	return r5;
-}
-*/

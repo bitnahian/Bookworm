@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <time.h>
 
 #include "worm.h"
 
@@ -139,19 +140,15 @@ book_t* graph_loader(size_t* count, char* filename) {
 
 void test_sample(book_t* graph, size_t count) {
 
+	clock_t begin = clock();
+	result_t* r1 = find_shortest_distance(graph, count, 41592, 2247);
+	clock_t end = clock();
 
-	result_t* r1 = find_book(graph, count, 9);
-	if (r1 == NULL) {
-		fprintf(stderr, "Fail! find_book() => result set is NULL.\n");
-	} else if (r1->n_elements != 1) {
-		fprintf(stderr, "Fail! find_book() => result set contains %zu elements.\n", r1->n_elements);
-	} else if (r1->elements[0]->id != 9) {
-		fprintf(stderr, "Fail! find_book() => result set contains book with ID %zu.\n", r1->n_elements);
-	}
-	else
-		printf("Found! find_book() => result->elements[0]->id = %zu\n", r1->elements[0]->id);
+	printf("\n\n %lf seconds\n\n", (double)(end - begin) / CLOCKS_PER_SEC);
 
-
+	free(r1->elements);
+	free(r1);
+/*
 	result_t* r2 = find_books_by_author(graph, count, 1);
 	if (r2 == NULL) {
 		fprintf(stderr, "Fail! find_books_by_author() => result set is NULL.\n");
@@ -167,11 +164,15 @@ void test_sample(book_t* graph, size_t count) {
 	}
 
 	result_t* r4 = find_books_reprinted(graph, count, 8);
-	result_t* r5 = find_books_k_distance(graph, count, 9, 2);
-
-
-
-
+	result_t* r5 = find_books_k_distance(graph, count, 9, 3);
+	*/
+	/*
+	for(int i = 0; i  < r5->n_elements; ++i)
+	{
+		printf("book_index: %zu book_id: %zu\n", r5->elements[i]->index, r5->elements[i]->id);
+	}
+	*/
+	/*
 	free(r1->elements);
 	free(r1);
 	free(r2->elements);
@@ -183,6 +184,9 @@ void test_sample(book_t* graph, size_t count) {
 
 	free(r3->elements);
 	free(r3);
+	*/
+
+
 }
 
 int main(int argc, char** argv) {
@@ -190,7 +194,7 @@ int main(int argc, char** argv) {
 	// Example usage
 
 	size_t count = 0;
-	book_t* graph = graph_loader(&count, "sample.graph");
+	book_t* graph = graph_loader(&count, "LargeLib.graph.graph");
 	if (graph == NULL) {
 		return 1;
 	}
