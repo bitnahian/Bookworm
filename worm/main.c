@@ -211,7 +211,7 @@ void my_test(book_t* graph, size_t count){
 
 
 	tic = clock();
-	r3 = find_books_reprinted(graph, count, 37);
+	r3 = find_books_reprinted(graph, count, 3040);
 	toc = clock();
 	printf("find_books_reprinted: %f seconds\n", (double)(toc - tic) / CLOCKS_PER_SEC);
 
@@ -221,7 +221,7 @@ void my_test(book_t* graph, size_t count){
 
 
 	tic = clock();
-	r4 = find_books_k_distance(graph, count, 94353, 3446);
+	r4 = find_books_k_distance(graph, count, 94353, 65535);
 	toc = clock();
 	printf("find_books_k_distance: %f seconds\n", (double)(toc - tic) / CLOCKS_PER_SEC);
 
@@ -235,7 +235,6 @@ void my_test(book_t* graph, size_t count){
 	printf("find_shortest_distance: %f seconds\n", (double)(toc - tic) / CLOCKS_PER_SEC);
 
 	printf("find_shortest_distance() => result set contains %zu elements.\n\n\n", r5->n_elements);
-
 
 
 	if (r1 != NULL) {
@@ -272,7 +271,6 @@ void my_test(book_t* graph, size_t count){
 		}
 		free(r5);
 	}
-
 }
 
 int main(int argc, char** argv) {

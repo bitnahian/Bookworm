@@ -25,8 +25,8 @@ struct book_t {
 
 
 typedef struct result_t {
-	book_t** elements;
 	size_t n_elements;
+	book_t** elements;
 } result_t;
 
 typedef struct node_t {
@@ -39,12 +39,12 @@ typedef struct node_t {
 typedef struct queue_t queue_t;
 struct queue_t{
   	book_t* head;
-	book_t* tail;
+		book_t* tail;
   	size_t size;
 };
 
 void enqueue(queue_t* queue, book_t* book);
-book_t* dequeue(queue_t* queue);
+size_t dequeue(queue_t* queue);
 queue_t* init_queue();
 //void freeQueue(queue_t* queue);
 bool isEmpty(queue_t* queue);

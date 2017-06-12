@@ -2,18 +2,19 @@ Flat profile:
 
 Each sample counts as 0.01 seconds.
   %   cumulative   self              self     total           
- time   seconds   seconds    calls  Ts/call  Ts/call  name    
- 22.24      0.02     0.02                             find_shortest_distance (worm.c:567 @ 4030df)
- 22.24      0.04     0.02                             my_test (main.c:204 @ 40166e)
- 11.12      0.05     0.01                             graph_loader (main.c:73 @ 401007)
- 11.12      0.06     0.01                             graph_loader (main.c:94 @ 401188)
- 11.12      0.07     0.01                             my_test (main.c:196 @ 40161f)
- 11.12      0.08     0.01                             my_test (main.c:206 @ 401693)
- 11.12      0.09     0.01                             my_test (main.c:243 @ 40184c)
-  0.00      0.09     0.00       13     0.00     0.00  enqueue (worm.c:19 @ 401a3f)
-  0.00      0.09     0.00       12     0.00     0.00  main (main.c:278 @ 401922)
-  0.00      0.09     0.00       12     0.00     0.00  my_test (main.c:183 @ 4015dc)
-  0.00      0.09     0.00        1     0.00     0.00  find_shortest_distance (worm.c:493 @ 402afa)
+ time   seconds   seconds    calls  ms/call  ms/call  name    
+ 22.24      0.02     0.02                             etext
+ 22.24      0.04     0.02                             my_test (main.c:264 @ 40167a)
+ 11.12      0.05     0.01        1    10.01    10.01  main (main.c:278 @ 401699)
+ 11.12      0.06     0.01                             dequeue (worm.c:35 @ 401843)
+ 11.12      0.07     0.01                             graph_loader (main.c:73 @ 401007)
+ 11.12      0.08     0.01                             graph_loader (main.c:94 @ 401188)
+ 11.12      0.09     0.01                             my_test (main.c:226 @ 401621)
+  0.00      0.09     0.00       13     0.00     0.00  find_books_by_author (worm.c:142 @ 401a27)
+  0.00      0.09     0.00       11     0.00     0.00  init_queue (worm.c:53 @ 4018d9)
+  0.00      0.09     0.00       11     0.00     0.00  init_result (worm.c:70 @ 401955)
+  0.00      0.09     0.00        1     0.00     0.00  _fini
+  0.00      0.09     0.00        1     0.00     0.00  find_book (worm.c:78 @ 401981)
   0.00      0.09     0.00        1     0.00     0.00  graph_loader (main.c:12 @ 400be6)
 
  %         the percentage of the total running time of the
@@ -55,24 +56,29 @@ notice and this notice are preserved.
 granularity: each sample hit covers 2 byte(s) for 11.10% of 0.09 seconds
 
 index % time    self  children    called     name
-                0.00    0.00       1/13          find_shortest_distance (worm.c:546 @ 402f6b) [253]
-                0.00    0.00      12/13          etext [36]
-[8]      0.0    0.00    0.00      13         enqueue (worm.c:19 @ 401a3f) [8]
+                0.01    0.00       1/1           enqueue (worm.c:29 @ 401813) [5]
+[3]     11.1    0.01    0.00       1         main (main.c:278 @ 401699) [3]
 -----------------------------------------------
-                0.00    0.00       1/12          find_shortest_distance (worm.c:580 @ 40319b) [275]
-                0.00    0.00      11/12          find_shortest_distance (worm.c:582 @ 4031f1) [277]
-[9]      0.0    0.00    0.00      12         main (main.c:278 @ 401922) [9]
+                                                 <spontaneous>
+[4]     11.1    0.01    0.00                 dequeue (worm.c:35 @ 401843) [4]
 -----------------------------------------------
-                0.00    0.00       1/12          my_test (main.c:237 @ 40181f) [421]
-                0.00    0.00       1/12          find_shortest_distance (worm.c:582 @ 4031f1) [277]
-                0.00    0.00      10/12          __libc_csu_fini [449]
-[10]     0.0    0.00    0.00      12         my_test (main.c:183 @ 4015dc) [10]
+                0.00    0.00      13/13          etext [1]
+[9]      0.0    0.00    0.00      13         find_books_by_author (worm.c:142 @ 401a27) [9]
 -----------------------------------------------
-                0.00    0.00       1/1           my_test (main.c:224 @ 401756) [413]
-[11]     0.0    0.00    0.00       1         find_shortest_distance (worm.c:493 @ 402afa) [11]
+                0.00    0.00      11/11          etext [1]
+[10]     0.0    0.00    0.00      11         init_queue (worm.c:53 @ 4018d9) [10]
 -----------------------------------------------
-                0.00    0.00       1/1           my_test (main.c:234 @ 4017ea) [419]
-[12]     0.0    0.00    0.00       1         graph_loader (main.c:12 @ 400be6) [12]
+                0.00    0.00      11/11          etext [1]
+[11]     0.0    0.00    0.00      11         init_result (worm.c:70 @ 401955) [11]
+-----------------------------------------------
+                0.00    0.00       1/1           etext [1]
+[12]     0.0    0.00    0.00       1         find_book (worm.c:78 @ 401981) [12]
+-----------------------------------------------
+                0.00    0.00       1/1           enqueue (worm.c:25 @ 4017ee) [30]
+[13]     0.0    0.00    0.00       1         graph_loader (main.c:12 @ 400be6) [13]
+-----------------------------------------------
+                0.00    0.00       1/1           main (main.c:305 @ 401755) [330]
+[347]    0.0    0.00    0.00       1         _fini [347]
 -----------------------------------------------
 
  This table describes the call tree of the program, and was sorted by
@@ -165,7 +171,8 @@ notice and this notice are preserved.
 
 Index by function name
 
-   [8] enqueue (worm.c:19 @ 401a3f) [3] graph_loader (main.c:73 @ 401007) [5] my_test (main.c:196 @ 40161f)
-  [11] find_shortest_distance (worm.c:493 @ 402afa) [4] graph_loader (main.c:94 @ 401188) [2] my_test (main.c:204 @ 40166e)
-   [1] find_shortest_distance (worm.c:567 @ 4030df) [9] main (main.c:278 @ 401922) [6] my_test (main.c:206 @ 401693)
-  [12] graph_loader (main.c:12 @ 400be6) [10] my_test (main.c:183 @ 4015dc) [7] my_test (main.c:243 @ 40184c)
+ [347] _fini                  [13] graph_loader (main.c:12 @ 400be6) [3] main (main.c:278 @ 401699)
+   [4] dequeue (worm.c:35 @ 401843) [6] graph_loader (main.c:73 @ 401007) [8] my_test (main.c:226 @ 401621)
+   [1] etext                   [7] graph_loader (main.c:94 @ 401188) [2] my_test (main.c:264 @ 40167a)
+  [12] find_book (worm.c:78 @ 401981) [10] init_queue (worm.c:53 @ 4018d9)
+   [9] find_books_by_author (worm.c:142 @ 401a27) [11] init_result (worm.c:70 @ 401955)
